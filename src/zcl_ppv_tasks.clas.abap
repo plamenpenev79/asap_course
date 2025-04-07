@@ -254,58 +254,49 @@ CLASS zcl_ppv_tasks IMPLEMENTATION.
     DATA ppv_helper TYPE REF TO ppv_helper.
     ppv_helper = NEW #( ).
 
-    ppv_helper->migrate_data_from_db( ).
-
     SELECT FROM ZTRAVEL_PPV FIELDS * INTO TABLE @DATA(l_travel_records).
 
     "7.1
-    DATA l_travel_records_filtered TYPE TABLE OF ppv_helper->travel_record.
-
-    SELECT *
-        FROM @l_travel_records as a
-         WHERE agency_id = '070001' AND
-         booking_fee = 20 AND
-         currency_code = 'JPY'
-         INTO CORRESPONDING FIELDS OF TABLE @l_travel_records_filtered.
-
     DATA filtered_ids TYPE TABLE OF string.
 
-    LOOP AT l_travel_records_filtered INTO DATA(rec).
-        APPEND rec-travel_id TO filtered_ids.
+    LOOP AT l_travel_records INTO DATA(rec).
+        IF rec-agency_id = '070001' AND
+            rec-booking_fee = 20 AND
+            rec-currency_code = 'JPY'.
+            APPEND rec-travel_id TO filtered_ids.
+        ENDIF.
     ENDLOOP.
 
     et_travel_ids_task7_1 = filtered_ids.
 
     "7.2
     CLEAR filtered_ids.
-    CLEAR l_travel_records_filtered.
 
-    SELECT *
-        FROM @l_travel_records as a
-         WHERE total_price > 2000 AND
-         currency_code = 'USD'
-         INTO CORRESPONDING FIELDS OF TABLE @l_travel_records_filtered.
-
-    LOOP AT l_travel_records_filtered INTO rec.
-        APPEND rec-travel_id TO filtered_ids.
+    LOOP AT l_travel_records INTO rec.
+        IF rec-total_price > 2000 AND
+            rec-currency_code = 'USD'.
+            APPEND rec-travel_id TO filtered_ids.
+        ENDIF.
     ENDLOOP.
 
     et_travel_ids_task7_2 = filtered_ids.
 
     "7.3
     CLEAR filtered_ids.
-    CLEAR l_travel_records_filtered.
 
+    "couldn't find any other way to safely delete item from table that we're iterating through
+    "couldn't find any iterator pattern like in Java to use it with LOOP AT
     DELETE l_travel_records WHERE currency_code <> 'EUR'.
 
     SORT l_travel_records BY total_price begin_date.
 
-    SELECT * FROM @l_travel_records as a
-        INTO CORRESPONDING FIELDS OF TABLE @l_travel_records_filtered
-        UP TO 10 ROWS.
+    DATA counter TYPE i VALUE 1.
 
-    LOOP AT l_travel_records_filtered INTO rec.
-        APPEND rec-travel_id TO filtered_ids.
+    LOOP AT l_travel_records INTO rec.
+        IF counter <= 10.
+            APPEND rec-travel_id TO filtered_ids.
+            counter += 1.
+        ENDIF.
     ENDLOOP.
 
     et_travel_ids_task7_3 = filtered_ids.
