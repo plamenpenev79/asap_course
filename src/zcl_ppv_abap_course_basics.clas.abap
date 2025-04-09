@@ -14,7 +14,6 @@ ENDCLASS.
 
 CLASS zcl_ppv_abap_course_basics IMPLEMENTATION.
 
-
   METHOD zif_abap_course_basics~calculator.
   ENDMETHOD.
 
@@ -45,6 +44,8 @@ CLASS zcl_ppv_abap_course_basics IMPLEMENTATION.
 
   METHOD zif_abap_course_basics~scrabble_score.
   ENDMETHOD.
+
+
 
 
 ENDCLASS.
