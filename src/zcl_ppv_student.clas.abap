@@ -12,32 +12,12 @@ CLASS zcl_ppv_student DEFINITION
     DATA major TYPE string.
     DATA email TYPE string.
 
+    INTERFACES zif_students.
+
     DATA l_table_student TYPE TABLE OF zstudent_ppv.
 
     "working area
     DATA l_student_record LIKE LINE OF l_table_student.
-
-    METHODS create_student
-        EXPORTING iv_student_name TYPE string
-                  iv_student_age TYPE i
-                  iv_major TYPE string
-                  iv_email TYPE string
-        RETURNING VALUE(rv_student_id) TYPE i.
-
-    METHODS get_student
-        EXPORTING iv_student_id TYPE i
-        RETURNING VALUE(rs_student) TYPE REF TO zcl_ppv_student.
-
-    "by requirement we do not have parameter iv_university_id
-    "but from my understanding we must have the option to alter this field
-    "in order to add/delete student from university
-    METHODS update_student
-        IMPORTING iv_student_id TYPE i
-                  iv_name TYPE string
-                  iv_age TYPE i
-                  iv_major TYPE string
-                  iv_email TYPE string
-                  iv_university_id TYPE i.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -47,7 +27,7 @@ ENDCLASS.
 
 CLASS zcl_ppv_student IMPLEMENTATION.
 
-    METHOD create_student.
+    METHOD zif_students~create_student.
 
         l_student_record-name = iv_student_name.
         l_student_record-age = iv_student_age.
@@ -73,7 +53,7 @@ CLASS zcl_ppv_student IMPLEMENTATION.
     ENDMETHOD.
 
 
-    METHOD get_student.
+    METHOD zif_students~get_student.
 
         SELECT SINGLE FROM zstudent_ppv
             FIELDS *
@@ -95,7 +75,7 @@ CLASS zcl_ppv_student IMPLEMENTATION.
     ENDMETHOD.
 
 
-    METHOD update_student.
+    METHOD zif_students~update_student.
 
         UPDATE zstudent_ppv FROM @( VALUE #( id = iv_student_id
                                              name = iv_name

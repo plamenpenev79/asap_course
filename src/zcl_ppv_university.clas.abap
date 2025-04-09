@@ -9,22 +9,11 @@ CLASS zcl_ppv_university DEFINITION
     DATA location TYPE string.
 
     DATA student TYPE REF TO zcl_ppv_student.
+    DATA if_student TYPE REF TO zif_students.
 
     TYPES t_student TYPE zstudent_ppv.
 
-    METHODS create_university
-        EXPORTING iv_university_name TYPE string
-                  iv_university_location TYPE string
-        RETURNING VALUE(rv_university_id) TYPE i.
-
-    METHODS add_student
-        IMPORTING iv_student_id TYPE i.
-
-    METHODS delete_student
-        IMPORTING iv_student_id TYPE i.
-
-    METHODS list_students
-        RETURNING VALUE(rs_students) TYPE zstudent_ppv.
+    INTERFACES zif_university.
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -34,7 +23,7 @@ ENDCLASS.
 
 CLASS zcl_ppv_university IMPLEMENTATION.
 
-    METHOD create_university.
+    METHOD zif_university~create_university.
 
         DATA l_table_university TYPE TABLE OF zuniversity_ppv.
 
@@ -43,9 +32,7 @@ CLASS zcl_ppv_university IMPLEMENTATION.
         l_record-name = iv_university_name.
         l_record-location = iv_university_location.
 
-        APPEND l_record TO l_table_university.
-
-        INSERT zuniversity_ppv FROM TABLE @l_table_university.
+        INSERT zuniversity_ppv FROM @l_record.
 
         IF sy-subrc = 0.
             "success
@@ -61,16 +48,16 @@ CLASS zcl_ppv_university IMPLEMENTATION.
     ENDMETHOD.
 
 
-    METHOD add_student.
+    METHOD zif_university~add_student.
         DATA(param) = iv_student_id.
 
-        DATA(student_found) = student->get_student(
+        DATA(student_found) = if_student->get_student(
             IMPORTING iv_student_id = param
         ).
 
         student_found->university_id = id.
 
-        student->update_student(
+        if_student->update_student(
             iv_student_id = student_found->id
             iv_name = student_found->name
             iv_age = student_found->age
@@ -82,17 +69,17 @@ CLASS zcl_ppv_university IMPLEMENTATION.
     ENDMETHOD.
 
 
-    METHOD delete_student.
+    METHOD zif_university~delete_student.
 
         DATA(param) = iv_student_id.
 
-        DATA(student_found) = student->get_student(
+        DATA(student_found) = if_student->get_student(
             IMPORTING iv_student_id = param
         ).
 
         student_found->university_id = 0.
 
-        student->update_student(
+        if_student->update_student(
             iv_student_id = student_found->id
             iv_name = student_found->name
             iv_age = student_found->age
@@ -104,7 +91,7 @@ CLASS zcl_ppv_university IMPLEMENTATION.
     ENDMETHOD.
 
 
-    METHOD list_students.
+    METHOD zif_university~list_students.
 
         SELECT FROM zstudent_ppv
             FIELDS *

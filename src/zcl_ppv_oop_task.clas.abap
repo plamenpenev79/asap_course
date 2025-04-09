@@ -39,7 +39,7 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     student->major = 'Lor'.
     student->email = 'kikkork@gmail.com'.
 
-    DATA(created_student_id) = student->create_student(
+    DATA(created_student_id) = student->zif_students~create_student(
         IMPORTING iv_student_name = student->name
                   iv_student_age = student->age
                   iv_major = student->major
@@ -51,7 +51,7 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     "test get student by id
     student->id = 23.
 
-    DATA(student_res) = student->get_student(
+    DATA(student_res) = student->zif_students~get_student(
         IMPORTING iv_student_id = student->id
     ).
 
@@ -64,7 +64,7 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     student->major = 'Dimcho'.
     student->email = 'rub@mailer.com'.
 
-    student->update_student(
+    student->zif_students~update_student(
         iv_student_id = student->id
         iv_name = student->name
         iv_age = student->age
@@ -74,7 +74,7 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     ).
 
     "test list students
-    DATA(students_list) = university->list_students( ).
+    DATA(students_list) = university->zif_university~list_students( ).
 
     out->write( '--------List students----------' ).
     out->write( students_list ).
