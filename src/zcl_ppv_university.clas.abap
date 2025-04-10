@@ -9,9 +9,6 @@ CLASS zcl_ppv_university DEFINITION
     DATA location TYPE string.
 
     DATA student TYPE REF TO zcl_ppv_student.
-    DATA if_student TYPE REF TO zif_students.
-
-    TYPES t_student TYPE zstudent_ppv.
 
     INTERFACES zif_university.
 
@@ -25,14 +22,31 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
     METHOD zif_university~create_university.
 
+        "before inserting data we have to deal with auto-increment issue
+        DATA l_incremented_id TYPE i.
+
+        SELECT FROM zuniversity_ppv
+            FIELDS id
+            ORDER BY id DESCENDING
+            INTO @DATA(l_latest_id)
+            UP TO 1 ROWS.
+        ENDSELECT.
+
+        IF sy-subrc = 0.
+            l_incremented_id = l_latest_id + 1.
+        ELSE.
+            l_incremented_id = 1.
+        ENDIF.
+
         DATA l_table_university TYPE TABLE OF zuniversity_ppv.
 
-        DATA l_record LIKE LINE OF l_table_university.
+        DATA l_university_record LIKE LINE OF l_table_university.
 
-        l_record-name = iv_university_name.
-        l_record-location = iv_university_location.
+        l_university_record-id = l_incremented_id.
+        l_university_record-name = iv_university_name.
+        l_university_record-location = iv_university_location.
 
-        INSERT zuniversity_ppv FROM @l_record.
+        INSERT INTO zuniversity_ppv VALUES @l_university_record.
 
         IF sy-subrc = 0.
             "success
@@ -43,27 +57,32 @@ CLASS zcl_ppv_university IMPLEMENTATION.
                 INTO @DATA(res).
 
             rv_university_id = res.
+        ELSE.
+            rv_university_id = -1.
         ENDIF.
 
     ENDMETHOD.
 
 
     METHOD zif_university~add_student.
-        DATA(param) = iv_student_id.
 
-        DATA(student_found) = if_student->get_student(
-            IMPORTING iv_student_id = param
+        student = NEW #(  ).
+
+        DATA(l_student_id) = iv_student_id.
+
+        DATA(l_student_found) = student->zif_students~get_student(
+            IMPORTING iv_student_id = l_student_id
         ).
 
-        student_found->university_id = id.
+        l_student_found->university_id = id.
 
-        if_student->update_student(
-            iv_student_id = student_found->id
-            iv_name = student_found->name
-            iv_age = student_found->age
-            iv_major = student_found->major
-            iv_email = student_found->email
-            iv_university_id = student_found->university_id
+        student->zif_students~update_student(
+            iv_student_id = l_student_found->student_id
+            iv_name = l_student_found->name
+            iv_age = l_student_found->age
+            iv_major = l_student_found->major
+            iv_email = l_student_found->email
+            iv_university_id = l_student_found->university_id
         ).
 
     ENDMETHOD.
@@ -71,21 +90,23 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
     METHOD zif_university~delete_student.
 
-        DATA(param) = iv_student_id.
+        student = NEW #(  ).
 
-        DATA(student_found) = if_student->get_student(
-            IMPORTING iv_student_id = param
+        DATA(l_student_id) = iv_student_id.
+
+        DATA(l_student_found) = student->zif_students~get_student(
+            IMPORTING iv_student_id = l_student_id
         ).
 
-        student_found->university_id = 0.
+        l_student_found->university_id = -1.
 
-        if_student->update_student(
-            iv_student_id = student_found->id
-            iv_name = student_found->name
-            iv_age = student_found->age
-            iv_major = student_found->major
-            iv_email = student_found->email
-            iv_university_id = student_found->university_id
+        student->zif_students~update_student(
+            iv_student_id = l_student_found->student_id
+            iv_name = l_student_found->name
+            iv_age = l_student_found->age
+            iv_major = l_student_found->major
+            iv_email = l_student_found->email
+            iv_university_id = l_student_found->university_id
         ).
 
     ENDMETHOD.
@@ -96,11 +117,11 @@ CLASS zcl_ppv_university IMPLEMENTATION.
         SELECT FROM zstudent_ppv
             FIELDS *
             WHERE university_id = @id
-            INTO @DATA(students_list).
+            INTO @DATA(l_students_list).
         ENDSELECT.
 
         "assign list result to returning variable
-        rs_students = students_list.
+        rs_students = l_students_list.
 
     ENDMETHOD.
 

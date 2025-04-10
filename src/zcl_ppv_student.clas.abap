@@ -5,7 +5,7 @@ CLASS zcl_ppv_student DEFINITION
 
   PUBLIC SECTION.
 
-    DATA id TYPE i.
+    DATA student_id TYPE i.
     DATA university_id TYPE i.
     DATA name TYPE string.
     DATA age TYPE i.
@@ -29,17 +29,35 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
     METHOD zif_students~create_student.
 
+        "before inserting data we have to deal with auto-increment issue
+        DATA l_incremented_id TYPE i.
+
+        SELECT FROM zstudent_ppv
+        FIELDS student_id
+            ORDER BY student_id DESCENDING
+            INTO @DATA(latest_id)
+            UP TO 1 ROWS.
+        ENDSELECT.
+
+        IF sy-subrc = 0.
+            l_incremented_id = latest_id + 1.
+        ELSE.
+            l_incremented_id = 1.
+        ENDIF.
+
+        l_student_record-student_id = l_incremented_id.
         l_student_record-name = iv_student_name.
         l_student_record-age = iv_student_age.
         l_student_record-major = iv_major.
         l_student_record-email = iv_email.
+        l_student_record-university_id = -1.
 
-        INSERT zstudent_ppv FROM @l_student_record.
+        INSERT INTO zstudent_ppv VALUES @l_student_record.
 
         IF sy-subrc = 0.
             "success
             SELECT SINGLE FROM zstudent_ppv
-                FIELDS id
+                FIELDS student_id
                 WHERE name = @iv_student_name AND
                       age = @iv_student_age AND
                       major = @iv_major AND
@@ -47,7 +65,8 @@ CLASS zcl_ppv_student IMPLEMENTATION.
                 INTO @DATA(res).
 
             rv_student_id = res.
-
+        ELSE.
+            rv_student_id = -1.
         ENDIF.
 
     ENDMETHOD.
@@ -57,13 +76,13 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
         SELECT SINGLE FROM zstudent_ppv
             FIELDS *
-            WHERE id = @iv_student_id
+            WHERE student_id = @iv_student_id
             INTO @l_student_record.
 
         DATA l_student_res TYPE REF TO zcl_ppv_student.
         l_student_res = NEW #( ).
 
-        l_student_res->id = l_student_record-id.
+        l_student_res->student_id = l_student_record-student_id.
         l_student_res->name = l_student_record-name.
         l_student_res->age = l_student_record-age.
         l_student_res->major = l_student_record-major.
@@ -77,7 +96,7 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
     METHOD zif_students~update_student.
 
-        UPDATE zstudent_ppv FROM @( VALUE #( id = iv_student_id
+        UPDATE zstudent_ppv FROM @( VALUE #( student_id = iv_student_id
                                              name = iv_name
                                              age = iv_age
                                              major = iv_major
