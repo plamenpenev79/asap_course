@@ -62,7 +62,7 @@ CLASS zcl_ppv_student IMPLEMENTATION.
                 INTO @DATA(l_student_id_found).
 
             rv_student_id = l_student_id_found.
-        ELSEIF sy-subrc = 4.
+        ELSE.
             rv_student_id = -1.
         ENDIF.
 

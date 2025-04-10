@@ -42,8 +42,8 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test add student to university
     "---------------------------------------------------
-    "DATA student_id TYPE i VALUE 23.
-    "university->id = 2.
+    "DATA student_id TYPE i VALUE 28.
+    "university->id = 4.
 
     "university->zif_university~add_student(
     "    iv_student_id = student_id
@@ -59,32 +59,32 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test list students
     "---------------------------------------------------
-    "DATA(students_list) = university->zif_university~list_students( ).
-    "university->id = 3.
+    university->id = 4.
+    DATA(students_list) = university->zif_university~list_students( ).
 
-    "out->write( '--------List students----------' ).
-    "out->write( students_list ).
+    out->write( '--------List students----------' ).
+    out->write( students_list ).
 
     "END UNIVERSITY SECTION
 
     "test create student
-    student->age = 19.
-    student->name = 'Plamen Penev'.
-    student->major = 'Major'.
-    student->email = 'ppenev@gmail.com'.
+    "student->age = 22.
+    "student->name = 'Petar Kostov'.
+    "student->major = 'Eco'.
+    "student->email = 'pesho@gmail.com'.
 
-    DATA(created_student_id) = student->zif_students~create_student(
-        IMPORTING iv_student_name   = student->name
-                  iv_student_age    = student->age
-                  iv_major          = student->major
-                  iv_email          = student->email
-    ).
+    "DATA(created_student_id) = student->zif_students~create_student(
+    "    IMPORTING iv_student_name   = student->name
+    "              iv_student_age    = student->age
+    "              iv_major          = student->major
+    "              iv_email          = student->email
+    ").
 
-    IF created_student_id = -1.
-        out->write( |Student not created.| ).
-    ELSE.
-        out->write( |Student with id/name/age/major/email -> { created_student_id }/{ student->name }/{ student->age }/{ student->major }/{ student->email } created.| ).
-    ENDIF.
+    "IF created_student_id = -1.
+    "    out->write( |Student not created.| ).
+    "ELSE.
+    "    out->write( |Student with id/name/age/major/email -> { created_student_id }/{ student->name }/{ student->age }/{ student->major }/{ student->email } created.| ).
+    "ENDIF.
 
     "test get student by id
     "---------------------------------------------------
