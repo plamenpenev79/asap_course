@@ -11,7 +11,6 @@ CLASS zcl_ppv_oop_task DEFINITION
 ENDCLASS.
 
 
-
 CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
   METHOD if_oo_adt_classrun~main.
@@ -59,15 +58,16 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test list students
     "---------------------------------------------------
-    university->id = 4.
-    DATA(students_list) = university->zif_university~list_students( ).
+    "university->id = 4.
+    "DATA(students_list) = university->zif_university~list_students( ).
 
-    out->write( '--------List students----------' ).
-    out->write( students_list ).
+    "out->write( '--------List students----------' ).
+    "out->write( students_list ).
 
     "END UNIVERSITY SECTION
 
     "test create student
+    "---------------------------------------------------
     "student->age = 22.
     "student->name = 'Petar Kostov'.
     "student->major = 'Eco'.
