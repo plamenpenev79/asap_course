@@ -52,8 +52,8 @@ CLASS zcl_ppv_university IMPLEMENTATION.
             "success
             SELECT SINGLE FROM zuniversity_ppv
                 FIELDS id
-                WHERE name = @iv_university_name AND
-                      location = @iv_university_location
+                WHERE name      = @iv_university_name AND
+                      location  = @iv_university_location
                 INTO @DATA(res).
 
             rv_university_id = res.
@@ -77,12 +77,12 @@ CLASS zcl_ppv_university IMPLEMENTATION.
         l_student_found->university_id = id.
 
         student->zif_students~update_student(
-            iv_student_id = l_student_found->student_id
-            iv_name = l_student_found->name
-            iv_age = l_student_found->age
-            iv_major = l_student_found->major
-            iv_email = l_student_found->email
-            iv_university_id = l_student_found->university_id
+            iv_student_id       = l_student_found->student_id
+            iv_name             = l_student_found->name
+            iv_age              = l_student_found->age
+            iv_major            = l_student_found->major
+            iv_email            = l_student_found->email
+            iv_university_id    = l_student_found->university_id
         ).
 
     ENDMETHOD.
@@ -101,12 +101,12 @@ CLASS zcl_ppv_university IMPLEMENTATION.
         l_student_found->university_id = -1.
 
         student->zif_students~update_student(
-            iv_student_id = l_student_found->student_id
-            iv_name = l_student_found->name
-            iv_age = l_student_found->age
-            iv_major = l_student_found->major
-            iv_email = l_student_found->email
-            iv_university_id = l_student_found->university_id
+            iv_student_id       = l_student_found->student_id
+            iv_name             = l_student_found->name
+            iv_age              = l_student_found->age
+            iv_major            = l_student_found->major
+            iv_email            = l_student_found->email
+            iv_university_id    = l_student_found->university_id
         ).
 
     ENDMETHOD.

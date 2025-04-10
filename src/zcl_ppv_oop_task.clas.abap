@@ -30,8 +30,8 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     "university->location = 'Burgas'.
 
     "DATA(created_university_id) = university->zif_university~create_university(
-    "    IMPORTING iv_university_name = university->name
-    "              iv_university_location = university->location
+    "    IMPORTING iv_university_name       = university->name
+    "              iv_university_location   = university->location
     ").
 
     "IF created_university_id = -1.
@@ -74,10 +74,10 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     student->email = 'ppenev@gmail.com'.
 
     DATA(created_student_id) = student->zif_students~create_student(
-        IMPORTING iv_student_name = student->name
-                  iv_student_age = student->age
-                  iv_major = student->major
-                  iv_email = student->email
+        IMPORTING iv_student_name   = student->name
+                  iv_student_age    = student->age
+                  iv_major          = student->major
+                  iv_email          = student->email
     ).
 
     IF created_student_id = -1.
@@ -105,12 +105,12 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     "student->email = 'ivanp@mailer.com'.
 
     "student->zif_students~update_student(
-    "    iv_student_id = student->student_id
-    "    iv_name = student->name
-    "    iv_age = student->age
-    "    iv_major = student->major
-    "    iv_email = student->email
-    "    iv_university_id = student->university_id
+    "    iv_student_id      = student->student_id
+    "    iv_name            = student->name
+    "    iv_age             = student->age
+    "    iv_major           = student->major
+    "    iv_email           = student->email
+    "    iv_university_id   = student->university_id
     ").
 
   ENDMETHOD.

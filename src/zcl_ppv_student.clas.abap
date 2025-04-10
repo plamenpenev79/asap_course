@@ -58,8 +58,8 @@ CLASS zcl_ppv_student IMPLEMENTATION.
             "success
             SELECT SINGLE FROM zstudent_ppv
                 FIELDS student_id
-                WHERE name = @iv_student_name AND
-                      age = @iv_student_age AND
+                WHERE name  = @iv_student_name AND
+                      age   = @iv_student_age AND
                       major = @iv_major AND
                       email = @iv_email
                 INTO @DATA(res).
@@ -82,12 +82,12 @@ CLASS zcl_ppv_student IMPLEMENTATION.
         DATA l_student_res TYPE REF TO zcl_ppv_student.
         l_student_res = NEW #( ).
 
-        l_student_res->student_id = l_student_record-student_id.
-        l_student_res->name = l_student_record-name.
-        l_student_res->age = l_student_record-age.
-        l_student_res->major = l_student_record-major.
-        l_student_res->email = l_student_record-email.
-        l_student_res->university_id = l_student_record-university_id.
+        l_student_res->student_id       = l_student_record-student_id.
+        l_student_res->name             = l_student_record-name.
+        l_student_res->age              = l_student_record-age.
+        l_student_res->major            = l_student_record-major.
+        l_student_res->email            = l_student_record-email.
+        l_student_res->university_id    = l_student_record-university_id.
 
         rs_student = l_student_res.
 
@@ -96,12 +96,12 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
     METHOD zif_students~update_student.
 
-        UPDATE zstudent_ppv FROM @( VALUE #( student_id = iv_student_id
-                                             name = iv_name
-                                             age = iv_age
-                                             major = iv_major
-                                             email = iv_email
-                                             university_id = iv_university_id ) ).
+        UPDATE zstudent_ppv FROM @( VALUE #( student_id     = iv_student_id
+                                             name           = iv_name
+                                             age            = iv_age
+                                             major          = iv_major
+                                             email          = iv_email
+                                             university_id  = iv_university_id ) ).
 
         IF sy-subrc = 0.
             "success
