@@ -26,8 +26,8 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test add university
     "---------------------------------------------------
-    "university->name = 'Free University'.
-    "university->location = 'Burgas'.
+    "university->name = 'Military University'.
+    "university->location = 'Veliko Tarnovo'.
 
     "DATA(created_university_id) = university->zif_university~create_university(
     "    IMPORTING iv_university_name       = university->name

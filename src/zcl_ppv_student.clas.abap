@@ -46,11 +46,11 @@ CLASS zcl_ppv_student IMPLEMENTATION.
         ENDIF.
 
         l_student_record-student_id = l_incremented_id.
+        l_student_record-university_id = -1.
         l_student_record-name = iv_student_name.
         l_student_record-age = iv_student_age.
         l_student_record-major = iv_major.
         l_student_record-email = iv_email.
-        l_student_record-university_id = -1.
 
         INSERT INTO zstudent_ppv VALUES @l_student_record.
 
@@ -58,14 +58,11 @@ CLASS zcl_ppv_student IMPLEMENTATION.
             "success
             SELECT SINGLE FROM zstudent_ppv
                 FIELDS student_id
-                WHERE name  = @iv_student_name AND
-                      age   = @iv_student_age AND
-                      major = @iv_major AND
-                      email = @iv_email
-                INTO @DATA(res).
+                WHERE student_id = @l_incremented_id
+                INTO @DATA(l_student_id_found).
 
-            rv_student_id = res.
-        ELSE.
+            rv_student_id = l_student_id_found.
+        ELSEIF sy-subrc = 4.
             rv_student_id = -1.
         ENDIF.
 
@@ -82,12 +79,15 @@ CLASS zcl_ppv_student IMPLEMENTATION.
         DATA l_student_res TYPE REF TO zcl_ppv_student.
         l_student_res = NEW #( ).
 
-        l_student_res->student_id       = l_student_record-student_id.
-        l_student_res->name             = l_student_record-name.
-        l_student_res->age              = l_student_record-age.
-        l_student_res->major            = l_student_record-major.
-        l_student_res->email            = l_student_record-email.
-        l_student_res->university_id    = l_student_record-university_id.
+        IF sy-subrc = 0.
+            "success
+            l_student_res->student_id       = l_student_record-student_id.
+            l_student_res->name             = l_student_record-name.
+            l_student_res->age              = l_student_record-age.
+            l_student_res->major            = l_student_record-major.
+            l_student_res->email            = l_student_record-email.
+            l_student_res->university_id    = l_student_record-university_id.
+        ENDIF.
 
         rs_student = l_student_res.
 
@@ -96,12 +96,13 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
     METHOD zif_students~update_student.
 
-        UPDATE zstudent_ppv FROM @( VALUE #( student_id     = iv_student_id
-                                             name           = iv_name
-                                             age            = iv_age
-                                             major          = iv_major
-                                             email          = iv_email
-                                             university_id  = iv_university_id ) ).
+        UPDATE zstudent_ppv
+            FROM @( VALUE #( student_id     = iv_student_id
+                             name           = iv_name
+                             age            = iv_age
+                             major          = iv_major
+                             email          = iv_email
+                             university_id  = iv_university_id ) ).
 
         IF sy-subrc = 0.
             "success
