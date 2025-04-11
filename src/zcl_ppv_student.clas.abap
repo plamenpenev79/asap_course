@@ -52,12 +52,12 @@ CLASS zcl_ppv_student IMPLEMENTATION.
             l_incremented_id = 1.
         ENDIF.
 
-        l_student_record-student_id = l_incremented_id.
-        l_student_record-university_id = -1.
-        l_student_record-name = iv_student_name.
-        l_student_record-age = iv_student_age.
-        l_student_record-major = iv_major.
-        l_student_record-email = iv_email.
+        l_student_record-student_id     = l_incremented_id.
+        l_student_record-university_id  = -1.
+        l_student_record-name           = iv_student_name.
+        l_student_record-age            = iv_student_age.
+        l_student_record-major          = iv_major.
+        l_student_record-email          = iv_email.
 
         INSERT INTO zstudent_ppv VALUES @l_student_record.
 

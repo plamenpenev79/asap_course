@@ -50,11 +50,11 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test delete student from university
     "---------------------------------------------------
-    DATA student_id TYPE i VALUE 29.
+    "DATA student_id TYPE i VALUE 29.
 
-    university->zif_university~delete_student(
-        iv_student_id = student_id
-    ).
+    "university->zif_university~delete_student(
+    "    iv_student_id = student_id
+    ").
 
     "test list students
     "---------------------------------------------------
