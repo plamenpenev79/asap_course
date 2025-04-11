@@ -54,14 +54,20 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
         INSERT INTO zstudent_ppv VALUES @l_student_record.
 
+        COMMIT WORK AND WAIT.
+
+        "nested ifs again. Sorry
         IF sy-subrc = 0.
-            "success
             SELECT SINGLE FROM zstudent_ppv
                 FIELDS student_id
                 WHERE student_id = @l_incremented_id
                 INTO @DATA(l_student_id_found).
 
-            rv_student_id = l_student_id_found.
+            IF sy-subrc = 0.
+                rv_student_id = l_student_id_found.
+            ELSE.
+                rv_student_id = -1.
+            ENDIF.
         ELSE.
             rv_student_id = -1.
         ENDIF.
@@ -80,7 +86,6 @@ CLASS zcl_ppv_student IMPLEMENTATION.
         l_student_res = NEW #( ).
 
         IF sy-subrc = 0.
-            "success
             l_student_res->student_id       = l_student_record-student_id.
             l_student_res->name             = l_student_record-name.
             l_student_res->age              = l_student_record-age.
@@ -104,8 +109,10 @@ CLASS zcl_ppv_student IMPLEMENTATION.
                              email          = iv_email
                              university_id  = iv_university_id ) ).
 
+        COMMIT WORK AND WAIT.
+
         IF sy-subrc = 0.
-            "success
+            "by design we return nothing from this method so just relax
         ENDIF.
 
     ENDMETHOD.

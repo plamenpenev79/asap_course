@@ -8,11 +8,6 @@ CLASS zcl_ppv_university DEFINITION
     DATA name TYPE string.
     DATA location TYPE string.
 
-    "local internal table to hold students
-    TYPES t_it_student TYPE REF TO zcl_ppv_student.
-    TYPES t_it_students TYPE TABLE OF t_it_student.
-    DATA it_students TYPE t_it_students.
-
     DATA l_student_instance TYPE REF TO zcl_ppv_student.
 
     INTERFACES zif_university.
@@ -21,6 +16,12 @@ CLASS zcl_ppv_university DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+    "local internal table to hold students
+    "it is not said that this list should be accessible from outside
+    "so we assume that it is private and will be accessed via methods
+    TYPES t_it_student TYPE REF TO zcl_ppv_student.
+    TYPES t_it_students TYPE TABLE OF t_it_student.
+    DATA it_students TYPE t_it_students.
 ENDCLASS.
 
 
@@ -29,25 +30,28 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
     METHOD constructor.
 
+        "when we instantiate university we automatically fetch the list of its students from DB
         SELECT FROM zstudent_ppv
             FIELDS *
-            WHERE university_id = @id
+            WHERE university_id = @me->id
             INTO TABLE @DATA(l_students_list).
 
-        LOOP AT l_students_list INTO DATA(rec).
-            DATA student TYPE t_it_student.
-            student = NEW #(  ).
+        IF sy-subrc = 0.
+            LOOP AT l_students_list INTO DATA(rec).
+                DATA student TYPE t_it_student.
+                student = NEW #(  ).
 
-            "mapping
-            student->student_id = rec-student_id.
-            student->name = rec-name.
-            student->age = rec-age.
-            student->major = rec-major.
-            student->email = rec-email.
-            student->university_id = rec-university_id.
+                "mapping
+                student->student_id = rec-student_id.
+                student->name = rec-name.
+                student->age = rec-age.
+                student->major = rec-major.
+                student->email = rec-email.
+                student->university_id = rec-university_id.
 
-            APPEND student to it_students.
-        ENDLOOP.
+                APPEND student to it_students.
+            ENDLOOP.
+        ENDIF.
 
     ENDMETHOD.
 
@@ -79,15 +83,21 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
         INSERT INTO zuniversity_ppv VALUES @l_university_record.
 
+        COMMIT WORK AND WAIT.
+
+        "nested ifs is like Gate to Hell. I hope we will learn a better way to handle this
         IF sy-subrc = 0.
-            "success
             SELECT SINGLE FROM zuniversity_ppv
                 FIELDS id
                 WHERE name      = @iv_university_name AND
                       location  = @iv_university_location
                 INTO @DATA(res).
 
-            rv_university_id = res.
+            IF sy-subrc = 0.
+                rv_university_id = res.
+            ELSE.
+                rv_university_id = -1.
+            ENDIF.
         ELSE.
             rv_university_id = -1.
         ENDIF.
@@ -105,19 +115,25 @@ CLASS zcl_ppv_university IMPLEMENTATION.
             IMPORTING iv_student_id = l_student_id
         ).
 
-        l_student_found->university_id = id.
+        IF sy-subrc = 0.
+            "there is a student with this id
+            "so we can update his university id to assign him to our university
+            l_student_found->university_id = id.
 
-        l_student_instance->zif_students~update_student(
-            iv_student_id       = l_student_found->student_id
-            iv_name             = l_student_found->name
-            iv_age              = l_student_found->age
-            iv_major            = l_student_found->major
-            iv_email            = l_student_found->email
-            iv_university_id    = l_student_found->university_id
-        ).
+            l_student_instance->zif_students~update_student(
+                iv_student_id       = l_student_found->student_id
+                iv_name             = l_student_found->name
+                iv_age              = l_student_found->age
+                iv_major            = l_student_found->major
+                iv_email            = l_student_found->email
+                iv_university_id    = l_student_found->university_id
+            ).
 
-        "we should update the local list of students
-        APPEND l_student_found TO it_students.
+            IF sy-subrc = 0.
+                "we should update the local list of students if we have successfully updated the university id
+                APPEND l_student_found TO it_students.
+            ENDIF.
+        ENDIF.
 
     ENDMETHOD.
 
@@ -132,21 +148,32 @@ CLASS zcl_ppv_university IMPLEMENTATION.
             IMPORTING iv_student_id = l_student_id
         ).
 
-        l_student_found->university_id = -1.
+        IF sy-subrc = 0.
+            "from the requirement it is not clear if we want to delete the whole student record
+            "or just to sign him off by updating university_id
+            "since we do not have delete_student as a method for student class -> we assume that student's record should stay
 
-        l_student_instance->zif_students~update_student(
-            iv_student_id       = l_student_found->student_id
-            iv_name             = l_student_found->name
-            iv_age              = l_student_found->age
-            iv_major            = l_student_found->major
-            iv_email            = l_student_found->email
-            iv_university_id    = l_student_found->university_id
-        ).
+            "student with this id exists
+            "so we can sign him off our university by resetting his university id
+            l_student_found->university_id = -1.
 
-        DATA st_id TYPE i.
-        st_id = l_student_found->student_id.
+            l_student_instance->zif_students~update_student(
+                iv_student_id       = l_student_found->student_id
+                iv_name             = l_student_found->name
+                iv_age              = l_student_found->age
+                iv_major            = l_student_found->major
+                iv_email            = l_student_found->email
+                iv_university_id    = l_student_found->university_id
+            ).
 
-        DELETE FROM zstudent_ppv WHERE student_id = @st_id.
+            IF sy-subrc = 0.
+                "we should delete student from local table
+                DATA l_student_found_id TYPE i.
+                l_student_found_id = l_student_found->student_id.
+
+                "DELETE it_students WHERE id = l_student_found_id.
+            ENDIF.
+        ENDIF.
 
     ENDMETHOD.
 
