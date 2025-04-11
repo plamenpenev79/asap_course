@@ -1,5 +1,8 @@
 INTERFACE zif_university
-  PUBLIC .
+  PUBLIC.
+
+  TYPES t_student_instance TYPE REF TO zcl_ppv_student.
+  TYPES t_db_students TYPE TABLE OF t_student_instance.
 
   METHODS create_university
         EXPORTING iv_university_name TYPE string
@@ -12,9 +15,6 @@ INTERFACE zif_university
     METHODS delete_student
         IMPORTING iv_student_id TYPE i.
 
-    "by requirement we do not have returning value for this method but we must return a result from it -> list of students
-    "so I added returning value
-    METHODS list_students
-        RETURNING VALUE(rs_students) TYPE zstudent_ppv.
+    METHODS list_students.
 
 ENDINTERFACE.

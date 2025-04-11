@@ -14,6 +14,9 @@ CLASS zcl_ppv_student DEFINITION
 
     INTERFACES zif_students.
 
+    TYPES t_db_students TYPE TABLE OF zstudent_ppv.
+    TYPES t_db_student_struct TYPE LINE OF t_db_students.
+
     DATA l_table_student TYPE TABLE OF zstudent_ppv.
 
     "working area
@@ -21,6 +24,10 @@ CLASS zcl_ppv_student DEFINITION
 
   PROTECTED SECTION.
   PRIVATE SECTION.
+
+    METHODS map_student_to_struct
+        RETURNING VALUE(rv_student_struct) TYPE t_db_student_struct.
+
 ENDCLASS.
 
 
@@ -56,21 +63,22 @@ CLASS zcl_ppv_student IMPLEMENTATION.
 
         COMMIT WORK AND WAIT.
 
-        "nested ifs again. Sorry
-        IF sy-subrc = 0.
-            SELECT SINGLE FROM zstudent_ppv
-                FIELDS student_id
-                WHERE student_id = @l_incremented_id
-                INTO @DATA(l_student_id_found).
-
-            IF sy-subrc = 0.
-                rv_student_id = l_student_id_found.
-            ELSE.
-                rv_student_id = -1.
-            ENDIF.
-        ELSE.
+        IF sy-subrc <> 0.
             rv_student_id = -1.
+            EXIT.
         ENDIF.
+
+        SELECT SINGLE FROM zstudent_ppv
+            FIELDS student_id
+            WHERE student_id = @l_incremented_id
+            INTO @DATA(l_student_id_found).
+
+        IF sy-subrc <> 0.
+            rv_student_id = -1.
+            EXIT.
+        ENDIF.
+
+        rv_student_id = l_student_id_found.
 
     ENDMETHOD.
 
@@ -82,19 +90,19 @@ CLASS zcl_ppv_student IMPLEMENTATION.
             WHERE student_id = @iv_student_id
             INTO @l_student_record.
 
-        DATA l_student_res TYPE REF TO zcl_ppv_student.
-        l_student_res = NEW #( ).
+        DATA l_student_instance TYPE REF TO zcl_ppv_student.
+        l_student_instance = NEW #(  ).
 
         IF sy-subrc = 0.
-            l_student_res->student_id       = l_student_record-student_id.
-            l_student_res->name             = l_student_record-name.
-            l_student_res->age              = l_student_record-age.
-            l_student_res->major            = l_student_record-major.
-            l_student_res->email            = l_student_record-email.
-            l_student_res->university_id    = l_student_record-university_id.
+            l_student_instance->student_id      = l_student_record-student_id.
+            l_student_instance->name            = l_student_record-name.
+            l_student_instance->age             = l_student_record-age.
+            l_student_instance->major           = l_student_record-major.
+            l_student_instance->email           = l_student_record-email.
+            l_student_instance->university_id   = l_student_record-university_id.
         ENDIF.
 
-        rs_student = l_student_res.
+        rs_student = l_student_instance.
 
     ENDMETHOD.
 
@@ -114,6 +122,21 @@ CLASS zcl_ppv_student IMPLEMENTATION.
         IF sy-subrc = 0.
             "by design we return nothing from this method so just relax
         ENDIF.
+
+    ENDMETHOD.
+
+    METHOD map_student_to_struct.
+
+        DATA l_student_struct TYPE t_db_student_struct.
+
+        l_student_struct-student_id     = me->student_id.
+        l_student_struct-name           = me->name.
+        l_student_struct-age            = me->age.
+        l_student_struct-major          = me->major.
+        l_student_struct-email          = me->email.
+        l_student_struct-university_id  = me->university_id.
+
+        rv_student_struct = l_student_struct.
 
     ENDMETHOD.
 

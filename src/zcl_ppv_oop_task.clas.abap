@@ -25,8 +25,8 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test add university
     "---------------------------------------------------
-    "university->name = 'Military University'.
-    "university->location = 'Veliko Tarnovo'.
+    "university->name = 'Economics University'.
+    "university->location = 'Varna'.
 
     "DATA(created_university_id) = university->zif_university~create_university(
     "    IMPORTING iv_university_name       = university->name
@@ -41,8 +41,8 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test add student to university
     "---------------------------------------------------
-    "DATA student_id TYPE i VALUE 28.
-    "university->id = 4.
+    "DATA student_id TYPE i VALUE 29.
+    "university->id = 5.
 
     "university->zif_university~add_student(
     "    iv_student_id = student_id
@@ -50,28 +50,25 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
 
     "test delete student from university
     "---------------------------------------------------
-    "DATA student_id TYPE i VALUE 23.
+    DATA student_id TYPE i VALUE 29.
 
-    "university->zif_university~delete_student(
-    "    iv_student_id = student_id
-    ").
+    university->zif_university~delete_student(
+        iv_student_id = student_id
+    ).
 
     "test list students
     "---------------------------------------------------
     "university->id = 4.
-    "DATA(students_list) = university->zif_university~list_students( ).
-
-    "out->write( '--------List students----------' ).
-    "out->write( students_list ).
+    "university->zif_university~list_students( ).
 
     "END UNIVERSITY SECTION
 
     "test create student
     "---------------------------------------------------
-    "student->age = 22.
-    "student->name = 'Petar Kostov'.
-    "student->major = 'Eco'.
-    "student->email = 'pesho@gmail.com'.
+    "student->age = 32.
+    "student->name = 'Pavel Goranov'.
+    "student->major = 'Ecoms'.
+    "student->email = 'pgoranov@gmail.com'.
 
     "DATA(created_student_id) = student->zif_students~create_student(
     "    IMPORTING iv_student_name   = student->name
@@ -94,15 +91,15 @@ CLASS zcl_ppv_oop_task IMPLEMENTATION.
     "    IMPORTING iv_student_id = student->student_id
     ").
 
-    "out->write( |Student with id -> { student_res->student_id } fetched with name/age/major/email -> { student_res->name }/{ student_res->age }/{ student_res->major }/{ student_res->email }| ).
+    "out->write( |Student with id -> { student_res->student_id } found with name/age/major/email -> { student_res->name }/{ student_res->age }/{ student_res->major }/{ student_res->email }| ).
 
     "test update student
     "---------------------------------------------------
-    "student->student_id = 23.
-    "student->age = 19.
-    "student->name = 'Ivan Petrov'.
+    "student->student_id = 29.
+    "student->age = 30.
+    "student->name = 'Plamen Gorov'.
     "student->major = 'Comms'.
-    "student->email = 'ivanp@mailer.com'.
+    "student->email = 'pgorov@gmail.com'.
 
     "student->zif_students~update_student(
     "    iv_student_id      = student->student_id

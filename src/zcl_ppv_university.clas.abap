@@ -30,28 +30,8 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
     METHOD constructor.
 
-        "when we instantiate university we automatically fetch the list of its students from DB
-        SELECT FROM zstudent_ppv
-            FIELDS *
-            WHERE university_id = @me->id
-            INTO TABLE @DATA(l_students_list).
-
-        IF sy-subrc = 0.
-            LOOP AT l_students_list INTO DATA(rec).
-                DATA student TYPE t_it_student.
-                student = NEW #(  ).
-
-                "mapping
-                student->student_id = rec-student_id.
-                student->name = rec-name.
-                student->age = rec-age.
-                student->major = rec-major.
-                student->email = rec-email.
-                student->university_id = rec-university_id.
-
-                APPEND student to it_students.
-            ENDLOOP.
-        ENDIF.
+        "we fetch students from ID for this university and store in internal table of students
+        me->zif_university~list_students( ).
 
     ENDMETHOD.
 
@@ -85,22 +65,23 @@ CLASS zcl_ppv_university IMPLEMENTATION.
 
         COMMIT WORK AND WAIT.
 
-        "nested ifs is like Gate to Hell. I hope we will learn a better way to handle this
-        IF sy-subrc = 0.
-            SELECT SINGLE FROM zuniversity_ppv
-                FIELDS id
-                WHERE name      = @iv_university_name AND
-                      location  = @iv_university_location
-                INTO @DATA(res).
-
-            IF sy-subrc = 0.
-                rv_university_id = res.
-            ELSE.
-                rv_university_id = -1.
-            ENDIF.
-        ELSE.
+        IF sy-subrc <> 0.
             rv_university_id = -1.
+            EXIT.
         ENDIF.
+
+        SELECT SINGLE FROM zuniversity_ppv
+            FIELDS id
+            WHERE name      = @iv_university_name AND
+                  location  = @iv_university_location
+            INTO @DATA(res).
+
+        IF sy-subrc <> 0.
+            rv_university_id = -1.
+            EXIT.
+        ENDIF.
+
+        rv_university_id = res.
 
     ENDMETHOD.
 
@@ -167,11 +148,7 @@ CLASS zcl_ppv_university IMPLEMENTATION.
             ).
 
             IF sy-subrc = 0.
-                "we should delete student from local table
-                DATA l_student_found_id TYPE i.
-                l_student_found_id = l_student_found->student_id.
-
-                "DELETE it_students WHERE id = l_student_found_id.
+                "do nothing
             ENDIF.
         ENDIF.
 
@@ -183,8 +160,23 @@ CLASS zcl_ppv_university IMPLEMENTATION.
         SELECT FROM zstudent_ppv
             FIELDS *
             WHERE university_id = @me->id
-            INTO @rs_students.
-        ENDSELECT.
+            INTO TABLE @DATA(l_students_list).
+
+        IF sy-subrc = 0.
+            LOOP AT l_students_list INTO DATA(rec).
+                DATA student TYPE t_it_student.
+                student = NEW #(  ).
+
+                student->student_id     = rec-student_id.
+                student->name           = rec-name.
+                student->age            = rec-age.
+                student->major          = rec-major.
+                student->email          = rec-email.
+                student->university_id  = rec-university_id.
+
+                APPEND student to it_students.
+            ENDLOOP.
+        ENDIF.
 
     ENDMETHOD.
 
